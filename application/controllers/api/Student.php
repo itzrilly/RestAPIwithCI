@@ -10,6 +10,7 @@
             $this->load->database();
             // load model
             $this->load->model(array('api/student_model'));
+            $this->load->library('form_validation');
         }
 
         /*
@@ -23,40 +24,64 @@
         public function index_post(){
             // insert data method
             // echo 'This is post method';
-            $data = json_decode(file_get_contents('php://input'));
 
-            $name = isset($data->name) ? $data->name : '';
-            $email = isset($data->email) ? $data->email : '';
-            $mobile = isset($data->mobile) ? $data->mobile : '';
-            $course = isset($data->course) ? $data->course : '';
+            // print_r($this->input->post()); die;
 
-            if(!empty(name) && !empty($email) && !empty($mobile) && !empty($course)){
-                // All values are available
-                $student = array(
-                    'name' => $name,
-                    'email' => $email,
-                    'mobile' => $mobile,
-                    'course' => $course
-                );
+            // Collecting form data inputs
+            $name = $this->input->post('name');
+            $email = $this->input->post('email');
+            $mobile = $this->input->post('mobile');
+            $course = $this->input->post('course');
 
-                if($this->student_model->insert_student($student)){
-                    $this->response(array(
-                        'status' => 1,
-                        'message' => 'Student has been created'
-                    ), REST_Controller::HTTP_OK);
-                }else{
-                    $this->response(array(
-                        'status' => 0,
-                        'message' => 'Failed to create student'
-                    ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
-                }
-            }else{
-                // We have some empty field
+            // Form validation for inputs
+            $this->form_validation->set_rules('name', 'Name', 'required');
+            $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+            $this->form_validation->set_rules('mobile', 'Mobile', 'required');
+            $this->form_validation->set_rules('course', 'Course', 'required');
+
+            // Checking form submission have any error or not
+            if($this->form_validation->run() === FALSE){
+                // We get some erros
                 $this->response(array(
                     'status' => 0,
                     'message' => 'All fields are needed'
                 ), REST_Controller::HTTP_NOT_FOUND);
+            }else{
+                if(!empty($name) && !empty($email) && !empty($mobile) && !empty($course)){
+                    // All values are available
+                    $student = array(
+                        'name' => $name,
+                        'email' => $email,
+                        'mobile' => $mobile,
+                        'course' => $course
+                    );
+    
+                    if($this->student_model->insert_student($student)){
+                        $this->response(array(
+                            'status' => 1,
+                            'message' => 'Student has been created'
+                        ), REST_Controller::HTTP_OK);
+                    }else{
+                        $this->response(array(
+                            'status' => 0,
+                            'message' => 'Failed to create student'
+                        ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
+                    }
+                }else{
+                    // We have some empty field
+                    $this->response(array(
+                        'status' => 0,
+                        'message' => 'All fields are needed'
+                    ), REST_Controller::HTTP_NOT_FOUND);
+                }
             }
+
+            /*$data = json_decode(file_get_contents('php://input'));
+
+            $name = isset($data->name) ? $data->name : '';
+            $email = isset($data->email) ? $data->email : '';
+            $mobile = isset($data->mobile) ? $data->mobile : '';
+            $course = isset($data->course) ? $data->course : '';*/
         }
 
         // UPDATE <url>/index.php/student
