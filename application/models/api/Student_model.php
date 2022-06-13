@@ -15,6 +15,10 @@ class Student_model extends CI_Model{
         return $query->result();
     }
 
+    public function insert_student($data = array()){
+        return $this->db->insert('tbl_students', $data);
+    }
+
 }
 
 ?>
