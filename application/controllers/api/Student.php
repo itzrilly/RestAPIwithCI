@@ -10,7 +10,8 @@
             $this->load->database();
             // load model
             $this->load->model(array('api/student_model'));
-            $this->load->library('form_validation');
+            $this->load->library(array('form_validation'));
+            $this->load->helper('security');
         }
 
         /*
@@ -28,10 +29,10 @@
             // print_r($this->input->post()); die;
 
             // Collecting form data inputs
-            $name = $this->input->post('name');
-            $email = $this->input->post('email');
-            $mobile = $this->input->post('mobile');
-            $course = $this->input->post('course');
+            $name = $this->security->xss_clean($this->input->post('name'));
+            $email = $this->security->xss_clean($this->input->post('email'));
+            $mobile = $this->security->xss_clean($this->input->post('mobile'));
+            $course = $this->security->xss_clean($this->input->post('course'));
 
             // Form validation for inputs
             $this->form_validation->set_rules('name', 'Name', 'required');
