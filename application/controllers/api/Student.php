@@ -88,7 +88,33 @@
         // UPDATE <url>/index.php/student
         public function index_put(){
             // update data method
-            echo 'This is put method';
+            $data = json_decode(file_get_contents('php://input'));
+
+            if(isset($data->id) && isset($data->name) && isset($data->email) && isset($data->mobile) && isset($data->course)){
+                $student_id = $data->id;
+                $student_info = array(
+                    'name' => $data->name,
+                    'email' => $data->email,
+                    'mobile' => $data->mobile,
+                    'course' => $data->course
+                );
+                if($this->student_model->update_student($student_id, $student_info)){
+                    $this->response(array(
+                        'status' => 1,
+                        'message' => 'Student data updated successfully'
+                    ), REST_Controller::HTTP_OK);
+                }else{
+                    $this->response(array(
+                        'status' => 0,
+                        'message' => 'Failed to update student data'
+                    ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
+                }
+            }else{
+                $this->response(array(
+                    'status' => 0,
+                    'message' => 'All fields are needed'
+                ), REST_Controller::HTTP_NOT_FOUND);
+            }
         }
 
         // DELETE <url>/index.php/student
@@ -115,7 +141,6 @@
         // GET <url>/index.php/student
         public function index_get(){
             // list data method
-            // echo 'This is get method';
 
             $students = $this->student_model->get_students();
 
